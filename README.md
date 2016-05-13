@@ -50,7 +50,7 @@ $result will contain an associative array of the API response.  Store the useful
 
 **Setting a Shipping Address**
 
-The setShippingAddress() method allows you to pass the shipping address to PayPal before creating the transaction. The address will appear when the buyer logs into PayPal or will be used to prepopulate the address form fields on the Guest Checkout. This address is also used in the DoExpressCheckoutPayment API call so it will appear on the payment receipt & transaction history.
+The setShippingAddress() method allows you to pass the shipping address to PayPal before creating the transaction. The address will appear when the buyer logs into PayPal or will be used to populate the address form fields on the Guest Checkout. This address is also used in the *DoExpressCheckoutPayment* API call so it will appear on the payment receipt & transaction history.
 ```php
 setShippingAddress($buyerName, $addressLine1, $addressLine2, $townCity, $regionProvince, $zipCode, $countryCode);
 ```
@@ -60,7 +60,7 @@ $paypal->setShippingAddress('Sherlock Holmes', '221b Baker St', 'Marylebone', 'L
 ```
 **Passing Cart Line Items**
 
-The setLineItem() method allows you to pass *multiple* shopping cart line items to PayPal. This will appear on the order summary when the buyer is redirected to PayPal and is also used in the DoExpressCheckoutPayment API so a detailed breakdown of the order is available on the PayPal receipts & transaction history.
+The setLineItem() method allows you to pass *multiple* shopping cart line items to PayPal. This will appear on the order summary when the buyer is redirected to PayPal and is also used in the *DoExpressCheckoutPayment* API so a detailed breakdown of the order is available on the PayPal receipts & transaction history.
 ```php
 setLineItem($itemName, $itemQty, $itemPrice);
 ```
@@ -95,10 +95,10 @@ $paypal->setTaxAmt('10.00');
 
 **Creating a transaction**
 
-The create() method will setup the transaction using the SetExpressCheckout API call. If successful a unique token is returned that identifies your newly created transaction. The buyer should then be redirected to PayPal with the EC-Token appened to the URL where they will be prompted to login or checkout as a guest.
+The create() method will setup the transaction using the *SetExpressCheckout* API call. If successful a unique token is returned that identifies your newly created transaction. The buyer should then be redirected to PayPal with the EC-Token appended to the URL where they will be prompted to login or checkout as a guest.
 
 ```php
-create($paymentAction,$currencyCode,$totalAmount);
+create($paymentAction,$currencyCode,$totalAmount,$optional[]);
 ```
 ```php
 // Example
@@ -114,11 +114,26 @@ $f3->reroute($result['redirect']);
 }
 ```
 
+**Retrieving details from PayPal**
+
+Once the buyer is returned from PayPal to your return URL the getDetails() method can be used to retrieve all the transaction and buyer details via *GetExpressCheckoutDetails* API before completing the transaction. All details are returned as an array.
+
+```php
+getShippingAddress($ecToken);
+```
+```php
+// Example
+// Retrieve EC Token from the URL
+$token=$f3->get('GET.token');
+// Retrieve the buyers shipping address via the GetExpressCheckout API
+$address=$paypal->getShippingAddress($token);
+```
+
 **Retrieving the Buyers Shipping Address**
 
-The getShippingAddress() method can be used to retrieve the shipping address the buyer selected or added during the PayPal checkout via the GetExpressCheckoutDetails API. 
+The getShippingAddress() method can be used to retrieve the shipping address the buyer selected or added during the PayPal checkout via the *GetExpressCheckoutDetails* API. 
 
-The address is returned as an array and will be automatically included as part of the final API call so the address will appear on payment receipts.
+The address is either added or updated in the current user session associated with the Express Checkout token. This is used in the final API call so the address will appear on payment receipts.
 
 ```php
 getShippingAddress($ecToken);
@@ -133,7 +148,7 @@ $address=$paypal->getShippingAddress($token);
 
 **Completing the Transaction**
 
-The complete() method calls the DoExpressCheckoutPayment API and completes the transaction. 
+The complete() method calls the *DoExpressCheckoutPayment* API and completes the transaction. 
 
 ```php
 complete($ecToken, $payerId);
@@ -155,4 +170,123 @@ die('Error with API call -'.$result["L_ERRORCODE0"]);
 // Redirect the buyer a receipt or order confirmation page
 // Store the status & transaction ID for your records
 }
+```
+
+### Express Checkout mark
+The following is a quick guide on implementing PayPal Express Checkout as a payment method (Express Checkout Mark) and creating a Sale transaction where funds are immediately captured.  In this flow, buyers initiate the Express Checkout flow after you have collected all their information such as name, email, shipping & billing address.
+
+![ECM payment flow](https://www.paypalobjects.com/webstatic/en_US/developer/docs/ec/ec-page-flow.png)
+
+When the buyer chooses to pay with PayPal, the Express Checkout flow commences.
+
+Define a new route that will be used to setup the Express Checkout transaction and redirect the buyer to PayPal.
+
+```php
+$f3->route('GET /expresscheckout',
+function ($f3) {
+
+//Instantiate the class
+$paypal = new PayPal;
+
+// Set the shipping address (if required).
+$paypal->setShippingAddress('John Doe', 'Test Address 1', 'Test Address 2', 'Test City', 'Test Province', 'D15', 'IE');
+
+// Set Cart Items
+$paypal->setLineItem("Phone Case", 1, "10.00"); //10.00
+$paypal->setLineItem("Smart Phone", 1, "200.00"); //200.00
+$paypal->setLineItem("Screen Protector", 5, "1.00"); //5.00
+
+// Set Shipping amount
+$paypal->setShippingAmt("10.00");
+
+// Set Tax
+$paypal->setTaxAmt("21.00");
+
+/*
+Prevent the buyer from changing the 
+shipping address on the PayPal website.
+*/
+$optional=array('ADDROVERRIDE'=>1);
+
+// Create Transaction, Total amount = Cart Items + Shipping Amount + Tax Amount
+$result = $paypal->create("Sale", "EUR", "246.00", $optional);
+
+// Reroute buyer to PayPal with resulting transaction token
+if ($result['ACK'] != 'Success') {
+// Handle API error code
+die('Error with API call - ' . $result["L_ERRORCODE0"]);
+} else {
+// Redirect Buyer to PayPal
+$f3->reroute($result['redirect']);
+}
+
+}
+);
+```
+When we create the transaction a token value will be returned in the response. The buyer is redirected to a specific URL with the token value defined so PayPal knows what transaction to display the buyer. 
+
+For simplicity the correct URL is returned from the create() method as the 'redirect' value. 
+
+
+After the buyer logs in or fills out their payment information on the guest checkout flow they will be redirected back to the URL defined in the PayPal section of your project config. 
+
+The URL will have two values appended to it, **token** & **PayerID**. The token will be the same EC token that is returned when you first created the transaction and the PayerID is a unique identifier for the buyers PayPal account.
+
+At this stage in the checkout you can either show an order review with an option to Complete or simply complete the transaction and display an order receipt/summary.
+
+####Order Review Page - optional step
+To display an order review page we can request all the transaction details from PayPal using the **getDetails()** method. This will include everything defined when you created the transaction and if the buyer has changed their shipping address on PayPal we can get the updated address from here.
+
+```php
+$f3->route('GET /review',
+function($f3) {
+// grab token from URL
+$token=$f3->get('GET.token');
+
+//Instantiate the Class
+$paypal=new PayPal;
+
+// Get Express Checkout details from PayPal
+$result=$paypal->getDetails($token);
+
+// Check for successful response
+if ($result['ACK'] != 'Success') {
+// Handle API error code
+die('Error with API call - ' . $result["L_ERRORCODE0"]);
+} else {
+// Use details to render an order review page
+// Show shipping address order details
+}
+
+}
+);
+```
+
+####Complete Transaction / Order Summary
+You can simply complete the transaction using the complete() method and display an order summary/receipt page to the buyer.
+
+```php
+$f3->route('GET /summary',
+function($f3) {
+// grab token & PayerID from URL
+$token=$f3->get('GET.token');
+$payerid=$f3->get('GET.PayerID');
+
+//Instantiate the Class
+$paypal=new PayPal;
+
+// complete the transaction
+$result=$paypal->complete($token, $payerid);
+
+// Reroute buyer to PayPal with resulting transaction token
+if ($result['ACK'] != 'Success') {
+// Handle API error code
+die('Error with API call - ' . $result["L_ERRORCODE0"]);
+} else {
+// Update back office - save transaction id, payment status etc
+// Display thank you/receipt to the buyer.
+}
+
+}
+);
 ```
