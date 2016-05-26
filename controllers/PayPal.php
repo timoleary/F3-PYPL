@@ -41,6 +41,7 @@ class PayPal
         $this->cancelurl = $f3->get('PAYPAL.cancel');
     }
 
+
     /**
      * Creates & parses NVP call
      * @param  $method string
@@ -188,6 +189,99 @@ class PayPal
         return $doec;
     }
 
+    /**
+     * Capture Authorization (DoCapture API Request)
+     * Partially or fully captures an authorization
+     * @param  $authorizationid string
+     * @param  $amt string
+     * @param  $currencycode string
+     * @param  $completetype string
+     * @return array
+     */
+    function capture($authorizationid, $amt, $currencycode, $completetype)
+    {
+        $nvp['AUTHORIZATIONID'] = $authorizationid;
+        $nvp['AMT'] = $amt;
+		$nvp['CURRENCYCODE'] = $currencycode;
+		$nvp['COMPLETETYPE'] = $completetype;
+
+        $docapture = $this->apireq('DoCapture', $nvp);
+        return $docapture;
+    }
+
+
+    /**
+     * Authorize Transaction (DoAuthorization API Request)
+     * Authorize a payment
+     * @param  $transactionid string
+     * @param  $amt string
+     * @return array
+     */
+    function authorize($transactionid, $amt)
+    {
+        $nvp['TRANSACTIONID'] = $transactionid;
+        $nvp['AMT'] = $amt;
+
+        $doauth = $this->apireq('DoAuthorization', $nvp);
+        return $doauth;
+    }
+
+
+    /**
+     * ReAuthorize Transaction (DoReauthorization API Request)
+     * The DoReauthorization API operation reauthorizes an existing authorization transaction.
+     * @param  $authorizationid string
+     * @param  $amt string
+     * @param  $currencycode string
+     * @return array
+     */
+    function reauth($authorizationid, $amt, $currencycode)
+    {
+        $nvp['AUTHORIZATIONID'] = $authorizationid;
+        $nvp['AMT'] = $amt;
+        $nvp['CURRENCYCODE'] = $currencycode;
+
+        $reauth = $this->apireq('DoReauthorization', $nvp);
+        return $reauth;
+    }
+
+
+     /**
+     * Void Authorization (DoVoid API Request)
+     * Void an order or an authorization.
+     * @param  $authorizationid string
+     * @return array
+     */
+    function void($authorizationid)
+    {
+        $nvp['AUTHORIZATIONID'] = $authorizationid;
+
+        $dovoid = $this->apireq('DoVoid', $nvp);
+        return $dovoid;
+    }
+
+
+    /**
+     * Refund Transaction (RefundTransaction API Request)
+     * Partially refunds or fully refunds the transaction
+     * @param  $transactionid string
+     * @param  $refundtype string
+     * @param  $amt string
+     * @return array
+     */
+    function refund($transactionid, $refundtype='Full', $amt=NULL)
+    {
+        $nvp['TRANSACTIONID'] = $transactionid;
+        $nvp['REFUNDTYPE'] = $refundtype;
+
+        if($refundtype=='Partial'){
+        $nvp['AMT'] = $amt;
+    	}
+
+        $refundtxn = $this->apireq('RefundTransaction', $nvp);
+        return $refundtxn;
+    }
+
 
     /**
      * // Transation & buyer details (GetExpressCheckoutDetails API Request)
@@ -200,6 +294,7 @@ class PayPal
         $getec = $this->apireq('GetExpressCheckoutDetails', $nvp);
         return $getec;
     }
+
 
     /**
      * Used for shortcut method where buyers address is not known.
