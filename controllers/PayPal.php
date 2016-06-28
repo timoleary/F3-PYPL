@@ -316,4 +316,41 @@ class PayPal
         $_SESSION[$token] = serialize($orderdetails);
     }
 
+
+    /**
+     * Used for shortcut method where buyers address is known and shipping 
+     * has been calculated. Resets shipping amount (if previously set) 
+     * and updates order total and adds new shipping amount.
+     * @param  $token string
+     * @param  $amt string
+     */
+    function updateShippingAmt($token, $amt)
+    {
+        $orderdetails = unserialize($_SESSION[$token]);
+        if (array_key_exists('PAYMENTREQUEST_0_SHIPPINGAMT',$orderdetails)) {
+            $orderdetails['PAYMENTREQUEST_0_AMT']=sprintf('%0.2f', $orderdetails['PAYMENTREQUEST_0_AMT'] - $orderdetails['PAYMENTREQUEST_0_SHIPPINGAMT']);
+        } 
+        $orderdetails['PAYMENTREQUEST_0_SHIPPINGAMT']=$amt;
+        $orderdetails['PAYMENTREQUEST_0_AMT']=sprintf('%0.2f', $orderdetails['PAYMENTREQUEST_0_AMT']+$amt);
+        $_SESSION[$token] = serialize($orderdetails);
+    }
+
+
+    /**
+     * Copy basket() to PayPal Checkout
+     * Transfer your basket details to the PayPal Checkout
+     * Returns a total value of items
+     * @param  $basket object
+     */
+    function copyBasket($basket){
+        $totalamount=0;
+        foreach($basket as $lineitem)
+        {
+            $this->setLineItem($lineitem->name,1,$lineitem->amount);
+            $totalamount+=$lineitem->amount;
+        }
+
+        return $totalamount;
+    }
+
 }
