@@ -14,6 +14,7 @@ class PayPal
     public $taxamt;
     public $returnurl;
     public $cancelurl;
+    public $logger;
 
     /**
      *    Class constructor
@@ -39,6 +40,9 @@ class PayPal
         $this->creds['VERSION'] = $f3->get('PAYPAL.apiver');
         $this->returnurl = $f3->get('PAYPAL.return');
         $this->cancelurl = $f3->get('PAYPAL.cancel');
+        if($f3->get('PAYPAL.log')){
+        $this->logger = new Log('paypal.log');
+        }
     }
 
 
@@ -60,7 +64,14 @@ class PayPal
 
         $result = \Web::instance()->request($this->endpoint, $options);
         parse_str($result['body'], $output);
+
+        if (isset($this->logger)){
+        $this->logreq("Request: ".http_build_query($arg));
+        $this->logreq("Response: ".$result['body']);
+        }
+
         return ($output);
+
     }
 
 
@@ -202,8 +213,8 @@ class PayPal
     {
         $nvp['AUTHORIZATIONID'] = $authorizationid;
         $nvp['AMT'] = $amt;
-		$nvp['CURRENCYCODE'] = $currencycode;
-		$nvp['COMPLETETYPE'] = $completetype;
+        $nvp['CURRENCYCODE'] = $currencycode;
+        $nvp['COMPLETETYPE'] = $completetype;
 
         $docapture = $this->apireq('DoCapture', $nvp);
         return $docapture;
@@ -276,7 +287,7 @@ class PayPal
 
         if($refundtype=='Partial'){
         $nvp['AMT'] = $amt;
-    	}
+        }
 
         $refundtxn = $this->apireq('RefundTransaction', $nvp);
         return $refundtxn;
@@ -353,4 +364,13 @@ class PayPal
         return $totalamount;
     }
 
+
+     /**
+     * Logs NVP Request
+     * @param  $request string
+     */
+    function logreq($request)
+    {
+        $this->logger->write($request);
+    }
 }
