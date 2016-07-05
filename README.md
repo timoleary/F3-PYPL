@@ -1,4 +1,4 @@
-### F3PYPL
+# F3PYPL
 F3PYPL is a Fat Free Framework plugin that helps quickly implement PayPal Express Checkout via the PayPal Classic API.
 
 ### Quick Start Config
@@ -13,6 +13,7 @@ endpoint=sandbox
 apiver=124.0
 return=http://
 cancel=http://
+log=
 ```
 
 - user - Your PayPal API Username
@@ -22,8 +23,10 @@ cancel=http://
 - apiver - API Version current release is 124.0
 - return - The URL that PayPal redirects your buyers to after they have logged in and clicked Continue or Pay
 - cancel - The URL that PayPal redirects the buyer to when they click the cancel & return link
+- log - logs all API requests & responses to paypal.log
 
-Add the PayPal.php file to your lib.
+Copy the `controllers/paypal.php` file into your `lib/` or your AUTOLOAD folder.
+
 
 ### Quick Start
 Create a route that will initialize the transaction (SetExpressCheckout API) & redirect the buyer to PayPal.
@@ -70,6 +73,39 @@ $paypal->setLineItem("Phone Case", 1, "10.00");
 $paypal->setLineItem("Smart Phone", 1, "100.00");
 $paypal->setLineItem("Screen Protector", 5, "1.00");
 ```
+
+**Passing Cart Line Items from Basket**
+
+The copyBasket() method allows you to transfer the F3 Basket line items to PayPal.
+```php
+copyBasket($basket, $name, $amount);
+```
+```php
+// Example if using the default example naming conventions
+$basket->set('name','peach');
+$basket->set('amount','10.00');
+$basket->save();
+$basket->reset();
+
+$basketcontents = $basket->find();  // array of basket items
+
+$paypal = new PayPal;
+$itemtotal=$paypal->copyBasket($basketcontents);
+```
+
+```php
+// Example if using your own naming conventions
+$basket->set('item','peach');
+$basket->set('cost','10.00');
+$basket->save();
+$basket->reset();
+
+$basketcontents = $basket->find();  // array of basket items
+
+$paypal = new PayPal;
+$itemtotal=$paypal->copyBasket($basketcontents,'item','cost');
+```
+
 
 **Setting the Shipping Amount**
 
@@ -172,7 +208,7 @@ die('Error with API call -'.$result["L_ERRORCODE0"]);
 }
 ```
 
-### Express Checkout mark
+### Express Checkout Mark (ECM)
 The following is a quick guide on implementing PayPal Express Checkout as a payment method (Express Checkout Mark) and creating a Sale transaction where funds are immediately captured.  In this flow, buyers initiate the Express Checkout flow after you have collected all their information such as name, email, shipping & billing address.
 
 ![ECM payment flow](https://www.paypalobjects.com/webstatic/en_US/developer/docs/ec/ec-page-flow.png)
@@ -278,7 +314,121 @@ $paypal=new PayPal;
 // complete the transaction
 $result=$paypal->complete($token, $payerid);
 
+// Check for successful response
+if ($result['ACK'] != 'Success') {
+// Handle API error code
+die('Error with API call - ' . $result["L_ERRORCODE0"]);
+} else {
+// Update back office - save transaction id, payment status etc
+// Display thank you/receipt to the buyer.
+}
+
+}
+);
+```
+
+### Express Checkout Shortcut (ECS)
+The following is a quick guide on implementing PayPal Express Checkout on the basket and creating a Sale transaction where funds are immediately captured.  In this flow, buyers initiate the Express Checkout Shortcut flow from the shopping cart/basket bypassing sign up and address forms as we leverage the API to retrieve those details from PayPal.
+
+![ECS payment flow](https://www.paypalobjects.com/webstatic/en_US/developer/docs/ec/ec-page-shortcut-flow.png)
+
+When the buyer clicks the Checkout with PayPal, the Express Checkout flow commences.
+
+Define a new route that will be used to setup the Express Checkout transaction and redirect the buyer to PayPal.
+
+```php
+$f3->route('GET /expresscheckout',
+function ($f3) {
+
+//Instantiate the class
+$paypal = new PayPal;
+
+// Set Cart Items manually or use copyBasket method.
+$paypal->setLineItem("Phone Case", 1, "10.00"); //10.00
+$paypal->setLineItem("Smart Phone", 1, "200.00"); //200.00
+
+// Set Tax
+$paypal->setTaxAmt("21.00");
+
+// Create Transaction, Total amount = Cart Items + Shipping Amount + Tax Amount
+$result = $paypal->create("Sale", "EUR", "231.00", $optional);
+
 // Reroute buyer to PayPal with resulting transaction token
+if ($result['ACK'] != 'Success') {
+// Handle API error code
+die('Error with API call - ' . $result["L_ERRORCODE0"]);
+} else {
+// Redirect Buyer to PayPal
+$f3->reroute($result['redirect']);
+}
+
+}
+);
+```
+When we create the transaction a token value will be returned in the response. The buyer is redirected to a specific URL with the token value defined so PayPal knows what transaction to display the buyer. 
+
+For simplicity the correct URL is returned from the create() method as the 'redirect' value. 
+
+
+After the buyer logs in or fills out their payment information on the guest checkout flow they will be redirected back to the URL defined in the PayPal section of your project config. 
+
+The URL will have two values appended to it, **token** & **PayerID**. The token will be the same EC token that is returned when you first created the transaction and the PayerID is a unique identifier for the buyers PayPal account.
+
+At this stage in the checkout you can either show an order review with an option to Complete or simply complete the transaction and display an order receipt/summary.
+
+####Order Review Page
+To display an order review page we can request all the transaction details from PayPal using the **getDetails()** method. This will include everything defined when you created the transaction and if the buyer has changed their shipping address on PayPal we can get the updated address from here.
+
+```php
+$f3->route('GET /review',
+function($f3) {
+// grab token from URL
+$token=$f3->get('GET.token');
+
+//Instantiate the Class
+$paypal=new PayPal;
+
+// Get Express Checkout details from PayPal
+$result=$paypal->getDetails($token);
+
+// Check for successful response
+if ($result['ACK'] != 'Success') {
+// Handle API error code
+die('Error with API call - ' . $result["L_ERRORCODE0"]);
+} else {
+// Use details of $result to render an order review page
+// Show shipping address order details
+
+// Update the session to store the new shipping address
+// this address is passed in the final API call
+$paypal->updateShippingAddress($token);
+
+// Update the session & order total with a new shipping amount
+$paypal->updateShippingAmt($token, '10.00');
+
+}
+
+}
+);
+```
+
+####Complete Transaction / Order Summary
+You can simply complete the transaction using the complete() method and display an order summary/receipt page to the buyer.
+
+```php
+$f3->route('GET /summary',
+function($f3) {
+// grab token & PayerID from URL
+$token=$f3->get('GET.token');
+$payerid=$f3->get('GET.PayerID');
+
+//Instantiate the Class
+$paypal=new PayPal;
+
+// complete the transaction
+$result=$paypal->complete($token, $payerid);
+
+// Check for successful response
 if ($result['ACK'] != 'Success') {
 // Handle API error code
 die('Error with API call - ' . $result["L_ERRORCODE0"]);

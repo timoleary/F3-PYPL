@@ -1,4 +1,5 @@
 <?php
+
 //! PayPal Express Checkout & Classic API
 class PayPal
 {
@@ -40,8 +41,8 @@ class PayPal
         $this->creds['VERSION'] = $f3->get('PAYPAL.apiver');
         $this->returnurl = $f3->get('PAYPAL.return');
         $this->cancelurl = $f3->get('PAYPAL.cancel');
-        if($f3->get('PAYPAL.log')){
-        $this->logger = new Log('paypal.log');
+        if ($f3->get('PAYPAL.log')) {
+            $this->logger = new Log('paypal.log');
         }
     }
 
@@ -65,9 +66,9 @@ class PayPal
         $result = \Web::instance()->request($this->endpoint, $options);
         parse_str($result['body'], $output);
 
-        if (isset($this->logger)){
-        $this->logreq("Request: ".http_build_query($arg));
-        $this->logreq("Response: ".$result['body']);
+        if (isset($this->logger)) {
+            $this->logreq("Request: " . http_build_query($arg));
+            $this->logreq("Response: " . $result['body']);
         }
 
         return ($output);
@@ -257,7 +258,7 @@ class PayPal
     }
 
 
-     /**
+    /**
      * Void Authorization (DoVoid API Request)
      * Void an order or an authorization.
      * @param  $authorizationid string
@@ -280,13 +281,13 @@ class PayPal
      * @param  $amt string
      * @return array
      */
-    function refund($transactionid, $refundtype='Full', $amt=NULL)
+    function refund($transactionid, $refundtype = 'Full', $amt = NULL)
     {
         $nvp['TRANSACTIONID'] = $transactionid;
         $nvp['REFUNDTYPE'] = $refundtype;
 
-        if($refundtype=='Partial'){
-        $nvp['AMT'] = $amt;
+        if ($refundtype == 'Partial') {
+            $nvp['AMT'] = $amt;
         }
 
         $refundtxn = $this->apireq('RefundTransaction', $nvp);
@@ -313,7 +314,7 @@ class PayPal
      * stored session.
      * @param  $token string
      */
-    function getShippingAddress($token)
+    function updateShippingAddress($token)
     {
         $shippingaddress = $this->getDetails($token);
         $orderdetails = unserialize($_SESSION[$token]);
@@ -329,8 +330,8 @@ class PayPal
 
 
     /**
-     * Used for shortcut method where buyers address is known and shipping 
-     * has been calculated. Resets shipping amount (if previously set) 
+     * Used for shortcut method where buyers address is known and shipping
+     * has been calculated. Resets shipping amount (if previously set)
      * and updates order total and adds new shipping amount.
      * @param  $token string
      * @param  $amt string
@@ -338,11 +339,11 @@ class PayPal
     function updateShippingAmt($token, $amt)
     {
         $orderdetails = unserialize($_SESSION[$token]);
-        if (array_key_exists('PAYMENTREQUEST_0_SHIPPINGAMT',$orderdetails)) {
-            $orderdetails['PAYMENTREQUEST_0_AMT']=sprintf('%0.2f', $orderdetails['PAYMENTREQUEST_0_AMT'] - $orderdetails['PAYMENTREQUEST_0_SHIPPINGAMT']);
-        } 
-        $orderdetails['PAYMENTREQUEST_0_SHIPPINGAMT']=$amt;
-        $orderdetails['PAYMENTREQUEST_0_AMT']=sprintf('%0.2f', $orderdetails['PAYMENTREQUEST_0_AMT']+$amt);
+        if (array_key_exists('PAYMENTREQUEST_0_SHIPPINGAMT', $orderdetails)) {
+            $orderdetails['PAYMENTREQUEST_0_AMT'] = sprintf('%0.2f', $orderdetails['PAYMENTREQUEST_0_AMT'] - $orderdetails['PAYMENTREQUEST_0_SHIPPINGAMT']);
+        }
+        $orderdetails['PAYMENTREQUEST_0_SHIPPINGAMT'] = $amt;
+        $orderdetails['PAYMENTREQUEST_0_AMT'] = sprintf('%0.2f', $orderdetails['PAYMENTREQUEST_0_AMT'] + $amt);
         $_SESSION[$token] = serialize($orderdetails);
     }
 
@@ -352,20 +353,22 @@ class PayPal
      * Transfer your basket details to the PayPal Checkout
      * Returns a total value of items
      * @param  $basket object
+     * @param  $name string
+     * @param  $amount string
      */
-    function copyBasket($basket){
-        $totalamount=0;
-        foreach($basket as $lineitem)
-        {
-            $this->setLineItem($lineitem->name,1,$lineitem->amount);
-            $totalamount+=$lineitem->amount;
+    function copyBasket($basket, $name = 'name', $amount = 'amount')
+    {
+        $totalamount = 0;
+        foreach ($basket as $lineitem) {
+            $this->setLineItem($lineitem->{$name}, 1, $lineitem->{$amount});
+            $totalamount += $lineitem->{$amount};
         }
 
         return $totalamount;
     }
 
 
-     /**
+    /**
      * Logs NVP Request
      * @param  $request string
      */
