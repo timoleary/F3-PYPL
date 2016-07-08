@@ -313,24 +313,27 @@ class PayPal
      * Using GetExpressCheckoutDetails the buyers shipping address is added to the
      * stored session.
      * @param  $token string
+     * @return array
      */
     function updateShippingAddress($token)
     {
-        $shippingaddress = $this->getDetails($token);
+        $ecdetails = $this->getDetails($token);
         $orderdetails = unserialize($_SESSION[$token]);
-        $orderdetails['PAYMENTREQUEST_0_SHIPTONAME'] = $shippingaddress['PAYMENTREQUEST_0_SHIPTONAME'];
-        $orderdetails['PAYMENTREQUEST_0_SHIPTOSTREET'] = $shippingaddress['PAYMENTREQUEST_0_SHIPTOSTREET'];
-        $orderdetails['PAYMENTREQUEST_0_SHIPTOSTREET2'] = $shippingaddress['PAYMENTREQUEST_0_SHIPTOSTREET2'];
-        $orderdetails['PAYMENTREQUEST_0_SHIPTOCITY'] = $shippingaddress['PAYMENTREQUEST_0_SHIPTOCITY'];
-        $orderdetails['PAYMENTREQUEST_0_SHIPTOSTATE'] = $shippingaddress['PAYMENTREQUEST_0_SHIPTOSTATE'];
-        $orderdetails['PAYMENTREQUEST_0_SHIPTOZIP'] = $shippingaddress['PAYMENTREQUEST_0_SHIPTOZIP'];
-        $orderdetails['PAYMENTREQUEST_0_SHIPTOCOUNTRYCODE'] = $shippingaddress['PAYMENTREQUEST_0_SHIPTOCOUNTRYCODE'];
+        $orderdetails['PAYMENTREQUEST_0_SHIPTONAME'] = $ecdetails['PAYMENTREQUEST_0_SHIPTONAME'];
+        $orderdetails['PAYMENTREQUEST_0_SHIPTOSTREET'] = $ecdetails['PAYMENTREQUEST_0_SHIPTOSTREET'];
+        $orderdetails['PAYMENTREQUEST_0_SHIPTOSTREET2'] = $ecdetails['PAYMENTREQUEST_0_SHIPTOSTREET2'];
+        $orderdetails['PAYMENTREQUEST_0_SHIPTOCITY'] = $ecdetails['PAYMENTREQUEST_0_SHIPTOCITY'];
+        $orderdetails['PAYMENTREQUEST_0_SHIPTOSTATE'] = $ecdetails['PAYMENTREQUEST_0_SHIPTOSTATE'];
+        $orderdetails['PAYMENTREQUEST_0_SHIPTOZIP'] = $ecdetails['PAYMENTREQUEST_0_SHIPTOZIP'];
+        $orderdetails['PAYMENTREQUEST_0_SHIPTOCOUNTRYCODE'] = $ecdetails['PAYMENTREQUEST_0_SHIPTOCOUNTRYCODE'];
         $_SESSION[$token] = serialize($orderdetails);
+
+        return $ecdetails;
     }
 
 
     /**
-     * Used for shortcut method where buyers address is known and shipping
+     * Used for payment mark method where buyers address is known and shipping
      * has been calculated. Resets shipping amount (if previously set)
      * and updates order total and adds new shipping amount.
      * @param  $token string
