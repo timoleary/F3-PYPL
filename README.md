@@ -155,31 +155,34 @@ $f3->reroute($result['redirect']);
 Once the buyer is returned from PayPal to your return URL the getDetails() method can be used to retrieve all the transaction and buyer details via *GetExpressCheckoutDetails* API before completing the transaction. All details are returned as an array.
 
 ```php
-getShippingAddress($ecToken);
+getDetails($ecToken);
 ```
 ```php
 // Example
 // Retrieve EC Token from the URL
 $token=$f3->get('GET.token');
 // Retrieve the buyers shipping address via the GetExpressCheckout API
-$address=$paypal->getShippingAddress($token);
+$address=$paypal->getDetails($token);
 ```
 
-**Retrieving the Buyers Shipping Address**
+**Updating the Buyers Shipping Address**
 
-The getShippingAddress() method can be used to retrieve the shipping address the buyer selected or added during the PayPal checkout via the *GetExpressCheckoutDetails* API. 
+The updateShippingAddress() method can be used to update the shipping address the buyer selected or added during the PayPal checkout via the *GetExpressCheckoutDetails* API. (Use getDetails() to retrieve this info).
 
-The address is either added or updated in the current user session associated with the Express Checkout token. This is used in the final API call so the address will appear on payment receipts.
+The address is either added or updated in the current user session associated with the Express Checkout token. The address is used in the final API call so the address will appear on payment receipts.
 
 ```php
-getShippingAddress($ecToken);
+updateShippingAddress($token, $name, $street1, $street2, $city, $state, $zip, $countrycode);
 ```
 ```php
 // Example
 // Retrieve EC Token from the URL
 $token=$f3->get('GET.token');
 // Retreive the buyers shipping address via the GetExpressCheckout API
-$address=$paypal->getShippingAddress($token);
+$paypal = new PayPal;
+$buyerdetails = $paypal->getDetails($token);
+
+$paypal->updateShippingAddress($token, $buyerdetails[SHIPTONAME], $buyerdetails[SHIPTOSTREET], $buyerdetails[SHIPTOSTREET2], $buyerdetails[SHIPTOCITY], $buyerdetails[SHIPTOSTATE], $buyerdetails[SHIPTOZIP], $buyerdetails[SHIPTOCOUNTRYCODE]);
 ```
 
 **Completing the Transaction**
@@ -389,19 +392,19 @@ $token=$f3->get('GET.token');
 $paypal=new PayPal;
 
 // Get Express Checkout details from PayPal
-$result=$paypal->getDetails($token);
+$buyerdetails=$paypal->getDetails($token);
 
 // Check for successful response
-if ($result['ACK'] != 'Success') {
+if ($buyerdetails['ACK'] != 'Success') {
 // Handle API error code
-die('Error with API call - ' . $result["L_ERRORCODE0"]);
+die('Error with API call - ' . $buyerdetails["L_ERRORCODE0"]);
 } else {
 // Use details of $result to render an order review page
 // Show shipping address order details
 
 // Update the session to store the new shipping address
 // this address is passed in the final API call
-$paypal->updateShippingAddress($token);
+$paypal->updateShippingAddress($token, $buyerdetails[SHIPTONAME], $buyerdetails[SHIPTOSTREET], $buyerdetails[SHIPTOSTREET2], $buyerdetails[SHIPTOCITY], $buyerdetails[SHIPTOSTATE], $buyerdetails[SHIPTOZIP], $buyerdetails[SHIPTOCOUNTRYCODE]);
 
 // Update the session & order total with a new shipping amount
 $paypal->updateShippingAmt($token, '10.00');
