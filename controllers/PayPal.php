@@ -281,13 +281,14 @@ class PayPal
      * @param  $amt string
      * @return array
      */
-    function refund($transactionid, $refundtype = 'Full', $amt = NULL)
+    function refund($transactionid, $refundtype = 'Full', $currencycode = NULL, $amt = NULL)
     {
         $nvp['TRANSACTIONID'] = $transactionid;
         $nvp['REFUNDTYPE'] = $refundtype;
 
         if ($refundtype == 'Partial') {
             $nvp['AMT'] = $amt;
+            $nvp['CURRENCYCODE'] = $currencycode;
         }
 
         $refundtxn = $this->apireq('RefundTransaction', $nvp);
@@ -359,12 +360,17 @@ class PayPal
      * @param  $name string
      * @param  $amount string
      */
-    function copyBasket($basket, $name = 'name', $amount = 'amount')
+    function copyBasket($basket, $name = 'name', $quantity = 'qty', $amount = 'amount')
     {
         $totalamount = 0;
         foreach ($basket as $lineitem) {
-            $this->setLineItem($lineitem->{$name}, 1, $lineitem->{$amount});
-            $totalamount += $lineitem->{$amount};
+
+            if (empty($lineitem->{$quantity})){
+                    $lineitem->{$quantity}=1;
+            }
+
+            $this->setLineItem($lineitem->{$name}, $lineitem->{$quantity}, $lineitem->{$amount});
+            $totalamount += $lineitem->{$amount} * $lineitem->{$quantity};
         }
 
         return $totalamount;

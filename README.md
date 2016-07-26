@@ -1,7 +1,7 @@
 # F3PYPL
 F3PYPL is a Fat Free Framework plugin that helps quickly implement PayPal Express Checkout via the PayPal Classic API.
 
-### Quick Start Config
+## Quick Start Config
 Add the following custom section to your project config.
 
 ```
@@ -13,7 +13,7 @@ endpoint=sandbox
 apiver=124.0
 return=http://
 cancel=http://
-log=
+log=0
 ```
 
 - user - Your PayPal API Username
@@ -28,7 +28,7 @@ log=
 Copy the `controllers/paypal.php` file into your `lib/` or your AUTOLOAD folder.
 
 
-### Quick Start
+## Quick Start
 Create a route that will initialize the transaction (SetExpressCheckout API) & redirect the buyer to PayPal.
 ```php
 //Create & redirect
@@ -49,7 +49,7 @@ $result=$paypal->complete($token, $payerid);
 ```
 $result will contain an associative array of the API response.  Store the useful bits like status & transaction ID.
 
-### Methods
+## Methods
 
 **Setting a Shipping Address**
 
@@ -76,7 +76,7 @@ $paypal->setLineItem("Screen Protector", 5, "1.00");
 
 **Passing Cart Line Items from Basket**
 
-The copyBasket() method allows you to transfer the F3 Basket line items to PayPal.
+The copyBasket() method allows you to transfer the F3 Basket line items to PayPal and returns a subtotal. If not specified quantity will default to 1.
 ```php
 copyBasket($basket, $name, $amount);
 ```
@@ -84,6 +84,7 @@ copyBasket($basket, $name, $amount);
 // Example if using the default example naming conventions
 $basket->set('name','peach');
 $basket->set('amount','10.00');
+$basket->set('qty','1');
 $basket->save();
 $basket->reset();
 
@@ -97,13 +98,14 @@ $itemtotal=$paypal->copyBasket($basketcontents);
 // Example if using your own naming conventions
 $basket->set('item','peach');
 $basket->set('cost','10.00');
+$basket->set('quantity','2');
 $basket->save();
 $basket->reset();
 
 $basketcontents = $basket->find();  // array of basket items
 
 $paypal = new PayPal;
-$itemtotal=$paypal->copyBasket($basketcontents,'item','cost');
+$itemtotal=$paypal->copyBasket($basketcontents,'item','quantity','cost'); // returns 20.
 ```
 
 
@@ -211,7 +213,26 @@ die('Error with API call -'.$result["L_ERRORCODE0"]);
 }
 ```
 
-### Express Checkout Mark (ECM)
+**Refunding a Transaction**
+
+The refund() method calls the *RefundTransaction* API and refunds the transaction. There are two types of refunds Full which will refund the full amount or partial which will refund an amount specified.
+
+```php
+refund($txnId, [$type, $currencycode, $amt]);
+```
+
+```php
+// Fake Transaction ID for 20..
+$txnId='FAKETXNID';
+
+//Partial Refund
+refund($txnId, 'Partial', 'EUR', '10.00']);
+
+//Full Refund
+refund($txnId);
+```
+
+## Express Checkout Mark (ECM)
 The following is a quick guide on implementing PayPal Express Checkout as a payment method (Express Checkout Mark) and creating a Sale transaction where funds are immediately captured.  In this flow, buyers initiate the Express Checkout flow after you have collected all their information such as name, email, shipping & billing address.
 
 ![ECM payment flow](https://www.paypalobjects.com/webstatic/en_US/developer/docs/ec/ec-page-flow.png)
@@ -273,7 +294,7 @@ The URL will have two values appended to it, **token** & **PayerID**. The token 
 
 At this stage in the checkout you can either show an order review with an option to Complete or simply complete the transaction and display an order receipt/summary.
 
-####Order Review Page - optional step
+###Order Review Page - optional step
 To display an order review page we can request all the transaction details from PayPal using the **getDetails()** method. This will include everything defined when you created the transaction and if the buyer has changed their shipping address on PayPal we can get the updated address from here.
 
 ```php
@@ -301,7 +322,7 @@ die('Error with API call - ' . $result["L_ERRORCODE0"]);
 );
 ```
 
-####Complete Transaction / Order Summary
+###Complete Transaction / Order Summary
 You can simply complete the transaction using the complete() method and display an order summary/receipt page to the buyer.
 
 ```php
@@ -330,7 +351,7 @@ die('Error with API call - ' . $result["L_ERRORCODE0"]);
 );
 ```
 
-### Express Checkout Shortcut (ECS)
+## Express Checkout Shortcut (ECS)
 The following is a quick guide on implementing PayPal Express Checkout on the basket and creating a Sale transaction where funds are immediately captured.  In this flow, buyers initiate the Express Checkout Shortcut flow from the shopping cart/basket bypassing sign up and address forms as we leverage the API to retrieve those details from PayPal.
 
 ![ECS payment flow](https://www.paypalobjects.com/webstatic/en_US/developer/docs/ec/ec-page-shortcut-flow.png)
@@ -379,7 +400,7 @@ The URL will have two values appended to it, **token** & **PayerID**. The token 
 
 At this stage in the checkout you can either show an order review with an option to Complete or simply complete the transaction and display an order receipt/summary.
 
-####Order Review Page
+###Order Review Page
 To display an order review page we can request all the transaction details from PayPal using the **getDetails()** method. This will include everything defined when you created the transaction and if the buyer has changed their shipping address on PayPal we can get the updated address from here.
 
 ```php
@@ -415,7 +436,7 @@ $paypal->updateShippingAmt($token, '10.00');
 );
 ```
 
-####Complete Transaction / Order Summary
+###Complete Transaction / Order Summary
 You can simply complete the transaction using the complete() method and display an order summary/receipt page to the buyer.
 
 ```php
@@ -443,3 +464,6 @@ die('Error with API call - ' . $result["L_ERRORCODE0"]);
 }
 );
 ```
+
+## License
+F3PYPL is licensed under GPL v.3
