@@ -310,26 +310,27 @@ class PayPal
 
 
     /**
-     * Used for shortcut method where buyers address is not known.
-     * Using GetExpressCheckoutDetails the buyers shipping address is added to the
-     * stored session.
-     * @param  $token string
-     * @return array
+     * Update shipping address if buyer changes address on review page etc
+     * @param $token string
+     * @param $name string
+     * @param $street1 string
+     * @param $street2 string
+     * @param $city string
+     * @param $state string
+     * @param $zip string
+     * @param $countrycode string
      */
-    function updateShippingAddress($token)
-    {
-        $ecdetails = $this->getDetails($token);
+    function updateShippingAddress($token, $name, $street1, $street2, $city, $state, $zip, $countrycode)
+    {   
         $orderdetails = unserialize($_SESSION[$token]);
-        $orderdetails['PAYMENTREQUEST_0_SHIPTONAME'] = $ecdetails['PAYMENTREQUEST_0_SHIPTONAME'];
-        $orderdetails['PAYMENTREQUEST_0_SHIPTOSTREET'] = $ecdetails['PAYMENTREQUEST_0_SHIPTOSTREET'];
-        $orderdetails['PAYMENTREQUEST_0_SHIPTOSTREET2'] = $ecdetails['PAYMENTREQUEST_0_SHIPTOSTREET2'];
-        $orderdetails['PAYMENTREQUEST_0_SHIPTOCITY'] = $ecdetails['PAYMENTREQUEST_0_SHIPTOCITY'];
-        $orderdetails['PAYMENTREQUEST_0_SHIPTOSTATE'] = $ecdetails['PAYMENTREQUEST_0_SHIPTOSTATE'];
-        $orderdetails['PAYMENTREQUEST_0_SHIPTOZIP'] = $ecdetails['PAYMENTREQUEST_0_SHIPTOZIP'];
-        $orderdetails['PAYMENTREQUEST_0_SHIPTOCOUNTRYCODE'] = $ecdetails['PAYMENTREQUEST_0_SHIPTOCOUNTRYCODE'];
+        $orderdetails['PAYMENTREQUEST_0_SHIPTONAME'] = $name;
+        $orderdetails['PAYMENTREQUEST_0_SHIPTOSTREET'] = $street1;
+        $orderdetails['PAYMENTREQUEST_0_SHIPTOSTREET2'] = $street2;
+        $orderdetails['PAYMENTREQUEST_0_SHIPTOCITY'] = $city;
+        $orderdetails['PAYMENTREQUEST_0_SHIPTOSTATE'] = $state;
+        $orderdetails['PAYMENTREQUEST_0_SHIPTOZIP'] = $zip;
+        $orderdetails['PAYMENTREQUEST_0_SHIPTOCOUNTRYCODE'] = $countrycode;
         $_SESSION[$token] = serialize($orderdetails);
-
-        return $ecdetails;
     }
 
 
