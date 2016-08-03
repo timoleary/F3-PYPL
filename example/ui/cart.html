@@ -1,0 +1,57 @@
+<include href="header.html" />
+
+<div class="container">
+<h1>Your Shopping Cart</h1>
+<span class="text-muted">You currently have {{@itemcount}} item(s) in your cart.</span>
+<br><br>
+<table id="cart" width="100%" cellpadding="0" cellspacing="0" border="0">
+<thead>
+  <tr>
+     <th width="10%"></th>
+     <th></th>
+     <th width="10%">Qty</th>
+     <th width="10%">Price</th>
+  </tr>
+
+</thead>
+<tbody>
+
+<repeat group="{{ @cartitems }}" value="{{ @item }}">
+<tr>
+	<td>
+	<img src="images/1.png">
+	</td>
+	<td>
+	{{@item.name}}
+	</td>
+	<td class="center">
+	{{@item.qty}}
+	</td>
+	<td class="center">
+	&euro; {{@item.amount}}
+	</td>
+</tr>
+</repeat>
+
+
+</tbody>
+</table>
+
+<div class="subcart">
+<span class="subtotal"><small>Subtotal</small> &euro; {{ @subtotal }}</span>
+<i>Shipping is calculated at checkout.</i>
+</div>
+
+
+<div class="containerfooter">
+<div class="checkout">
+<a href="ecs" id="ec">
+<img src="https://www.paypalobjects.com/webstatic/en_US/i/buttons/checkout-logo-medium.png" alt="Check out with PayPal" />
+</a>
+ -or-
+<a href="checkout" class="button">Checkout Now</a>
+</div>
+</div>
+</div>
+
+<include href="footer.html" />

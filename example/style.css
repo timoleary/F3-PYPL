@@ -1,0 +1,299 @@
+@import url(https://fonts.googleapis.com/css?family=Roboto:400,700);
+
+html {
+    position: relative;
+    min-height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    /* Margin bottom by footer height */
+    margin: 0;
+    padding: 0;
+    margin-bottom: 60px;
+    font-family: 'Roboto', sans-serif;
+    font-size: 14px;
+    color: #111;
+    background-color: #f0f0f0;
+}
+
+h1, h2 {
+    font-size: 20px;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+}
+
+h2 {
+    font-size: 18px;
+}
+
+h3 {
+    font-size: 24px;
+    line-height: 1.2em;
+    padding: 0;
+    margin: 20px 0 0 0;
+    color: #282828;
+}
+
+a,
+a:link,
+a:active,
+a:visited {
+    color: #111111;
+    text-decoration: none;
+    transition: .100s ease-in-out;
+    -moz-transition: .100s ease-in-out;
+    -webkit-transition: .100s ease-in-out;
+}
+
+a:hover {
+    color: #4993e4;
+    text-decoration: none;
+    transition: .100s ease-in-out;
+    -moz-transition: .100s ease-in-out;
+    -webkit-transition: .100s ease-in-out;
+}
+
+header {
+    min-height: 70px;
+    border-bottom: 1px solid #e6e6e6;
+    background-color: #FFFFFF;
+    margin-bottom: 40px;
+    overflow: auto;
+}
+
+header .top {
+    background-color: #555555;
+    height: 20px;
+}
+
+#logo {
+    color: #000000!important;
+    font-weight: bold;
+    letter-spacing: -2px;
+    display: inline-block;
+    font-size: 28px;
+    float: left;
+    padding: 8px;
+}
+
+#cartico {
+    float: right;
+    color: #ffffff;
+    background-color: #4993e4;
+    border: 1px solid #3386e1;
+    padding: 6px 12px;
+    font-size: 14px;
+    border-radius: 3px;
+    margin: 14px 0;
+}
+
+#cartico img {
+    width: 20px;
+    height: auto;
+    margin-bottom: -5px;
+    padding-right: 4px;
+}
+
+.paypal-button-widget {
+    display: inline-block;
+}
+
+nav {
+    max-width: 960px;
+    margin: 0 auto;
+}
+
+nav ul {
+    display: inline-block;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    float: left;
+    margin-left: 20px;
+}
+
+nav li {
+    display: inline-block;
+}
+
+nav li a,
+nav li a:link,
+nav li a:active,
+nav li a:visited {
+    color: #777;
+    text-decoration: none;
+    display: inline-block;
+    text-transform: uppercase;
+    font-weight: bold;
+    padding: 22px 10px;
+}
+
+nav li a:hover {
+    color: #000!important;
+    text-decoration: none;
+}
+
+nav .active a {
+    background-color: #4993e4!important;
+    color: #FFF!important;
+}
+
+#main {
+    max-width: 960px;
+    margin: 0 auto;
+    padding-bottom: 20px;
+}
+
+.container {
+    clear: both;
+    overflow: auto;
+    background: #fff;
+    margin: 0 0 30px;
+    border: solid 1px #e6e6e6;
+    padding: 20px;
+    -webkit-box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+}
+
+.containerfooter {
+    background: #f7f7f7;
+    margin: 0 0 30px;
+    border-top: 1px solid #eeeeee;
+    padding: 20px;
+    margin: 10px -20px -20px -20px;
+}
+
+.text-muted {
+    color: #777;
+}
+
+.text-left {
+    text-align: left;
+}
+
+.text-right {
+    text-align: right;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.hl {
+    width: 49%;
+    float: left;
+}
+
+.hr {
+    width: 49%;
+    float: right;
+}
+
+#cart, #shipping {
+    border: 1px solid #ebebeb;
+}
+
+#cart th {
+    background-color: #fafafa;
+}
+
+#cart tr:nth-child(even) {
+    background-color: #fafafa;
+}
+
+#cart td, th {
+    padding: 10px;
+}
+
+#cart img {
+    width: 60px;
+    height: 60px;
+}
+
+#shipping td, th {
+    padding: 15px;
+}
+
+#cart .center {
+    text-align: center;
+}
+
+.subcart {
+    text-align: right;
+    margin: 20px 0 40px 0;
+}
+
+.subtotal {
+    display: block;
+    font-weight: bold;
+    font-size: 22px;
+}
+
+.subtotal small {
+    font-size: 16px;
+}
+
+.checkout {
+    text-align: right;
+}
+
+.checkout img {
+    vertical-align: middle;
+}
+
+#address label {
+    display: inline-block;
+    width: 140px;
+}
+
+#address label {
+    margin: 4px 0;
+}
+
+input[type="submit"],
+a:link.button,
+a:active.button,
+a:visited.button {
+    font-family: 'Roboto', sans-serif;
+    cursor: pointer;
+    display: inline-block;
+    vertical-align: baseline;
+    color: #ffffff;
+    background-color: #4993e4;
+    border: 1px solid #3386e1;
+    padding: 6px 12px;
+    font-size: 14px;
+    border-radius: 3px;
+}
+
+input[type="submit"]:hover, a:hover.button {
+    color: #000!important;
+}
+
+.footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    /* Set the fixed height of the footer here */
+    height: 60px;
+    background-color: #555555;
+    color: #CCC;
+    text-align: center;
+    box-sizing: border-box;
+    padding: 20px;
+}
+
+.footer .copy {
+    font-size: 12px;
+}
+
+@media only screen and (min-width : 768px) {
+}
+
+@media only screen and (min-width : 992px) {
+}
+
+}
