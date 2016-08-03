@@ -354,6 +354,25 @@ class PayPal
 
 
     /**
+     * Used for payment mark method where buyers address is known and tax
+     * has been calculated. Resets tax amount (if previously set)
+     * and updates order total and adds new shipping amount.
+     * @param  $token string
+     * @param  $amt string
+     */
+    function updateTaxAmt($token, $amt)
+    {
+        $orderdetails = unserialize($_SESSION[$token]);
+        if (array_key_exists('PAYMENTREQUEST_0_TAXAMT', $orderdetails)) {
+            $orderdetails['PAYMENTREQUEST_0_AMT'] = sprintf('%0.2f', $orderdetails['PAYMENTREQUEST_0_AMT'] - $orderdetails['PAYMENTREQUEST_0_TAXAMT']);
+        }
+        $orderdetails['PAYMENTREQUEST_0_TAXAMT'] = $amt;
+        $orderdetails['PAYMENTREQUEST_0_AMT'] = sprintf('%0.2f', $orderdetails['PAYMENTREQUEST_0_AMT'] + $amt);
+        $_SESSION[$token] = serialize($orderdetails);
+    }
+
+
+    /**
      * Copy basket() to PayPal Checkout
      * Transfer your basket details to the PayPal Checkout
      * Returns a total value of items

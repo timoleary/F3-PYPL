@@ -1,0 +1,8 @@
+{
+    "require": {
+        "bcosca/fatfree": "^3.5"
+    },
+       "require-dev": {
+        "phpunit/phpunit": "5.4.*"
+    }
+}
