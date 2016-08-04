@@ -6,7 +6,6 @@ class PayPalTest extends PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $_SESSION['test'] = 'testy';
     }
 
 

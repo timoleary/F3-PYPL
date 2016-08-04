@@ -1,8 +1,16 @@
 {
+	"name": "kreative/f3-pypl",
+	"description": "PayPal Express Checkout integration for the PHP Fat-Free Framework",
+	"keywords": ["F3","fatfree","PayPal","Express Checkout"],
+	"homepage": "https://github.com/kreative/f3-pypl",
+	"license": "GPL-3.0",
+	"autoload": {
+		"classmap": ["lib/"]
+	},
     "require": {
         "bcosca/fatfree": "^3.5"
     },
        "require-dev": {
-        "phpunit/phpunit": "5.4.*"
+        "phpunit/phpunit": "4.8.*"
     }
 }

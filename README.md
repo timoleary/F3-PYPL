@@ -1,10 +1,10 @@
-# F3PYPL
-F3PYPL is a Fat Free Framework plugin that helps quickly implement PayPal Express Checkout via the PayPal Classic API.
+# F3-PYPL
+F3-PYPL is a Fat Free Framework plugin that helps quickly implement PayPal Express Checkout via the PayPal Classic API.
 
 **Express Checkout Shortcut & Mark Demo**  
 *Please use a sandbox account to make payments.*
 
-**[F3PYPL Integration Demo](https://timoleary.net/f3pypl)**
+**[F3-PYPL Integration Demo](https://timoleary.net/f3pypl)**
 
 
 
@@ -473,4 +473,4 @@ die('Error with API call - ' . $result["L_ERRORCODE0"]);
 ```
 
 ## License
-F3PYPL is licensed under GPL v.3
+F3-PYPL is licensed under GPL v.3
