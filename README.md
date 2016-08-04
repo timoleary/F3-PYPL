@@ -32,7 +32,10 @@ log=0
 - cancel - The URL that PayPal redirects the buyer to when they click the cancel & return link
 - log - logs all API requests & responses to paypal.log
 
-Copy the `controllers/paypal.php` file into your `lib/` or your AUTOLOAD folder.
+**Manual Install**
+Copy the `lib/paypal.php` file into your `lib/` or your AUTOLOAD folder.  
+or  
+**Automatic Install** via [Composer](https://packagist.org/packages/kreative/f3-pypl)
 
 
 ## Quick Start
