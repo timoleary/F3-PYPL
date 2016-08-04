@@ -1,5 +1,6 @@
 {
     "require": {
-        "bcosca/fatfree": "^3.5"
+        "bcosca/fatfree": "^3.5",
+        "kreative/f3-pypl": "^1.0"
     }
 }
