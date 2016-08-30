@@ -11,6 +11,6 @@
         "bcosca/fatfree": "^3.5"
     },
        "require-dev": {
-        "phpunit/phpunit": "4.8.*"
+        "phpunit/phpunit": "4.8"
     }
 }

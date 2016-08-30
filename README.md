@@ -1,4 +1,4 @@
-# F3-PYPL
+# F3-PYPL [![Build Status](https://travis-ci.org/kreative/F3-PYPL.svg?branch=master)](https://travis-ci.org/kreative/F3-PYPL)
 F3-PYPL is a Fat Free Framework plugin that helps quickly implement PayPal Express Checkout via the PayPal Classic API.
 
 **Express Checkout Shortcut & Mark Demo**  
