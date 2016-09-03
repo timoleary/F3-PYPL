@@ -214,7 +214,7 @@ $payerid=$f3->get('GET.PayerID');
 $result=$paypal->complete($token, $payerid);
 
 // Check the API call was successful
-if ($result['ACK']!='Success'){
+if ($result['ACK'] != 'Success' && $result['ACK'] != 'SuccessWithWarning'){
 // Handle the API error
 die('Error with API call -'.$result["L_ERRORCODE0"]);
 } else {
@@ -349,7 +349,7 @@ $paypal=new PayPal;
 $result=$paypal->complete($token, $payerid);
 
 // Check for successful response
-if ($result['ACK'] != 'Success') {
+if ($result['ACK'] != 'Success' && $result['ACK'] != 'SuccessWithWarning') {
 // Handle API error code
 die('Error with API call - ' . $result["L_ERRORCODE0"]);
 } else {
@@ -463,7 +463,7 @@ $paypal=new PayPal;
 $result=$paypal->complete($token, $payerid);
 
 // Check for successful response
-if ($result['ACK'] != 'Success') {
+if ($result['ACK'] != 'Success' && $result['ACK'] != 'SuccessWithWarning') {
 // Handle API error code
 die('Error with API call - ' . $result["L_ERRORCODE0"]);
 } else {

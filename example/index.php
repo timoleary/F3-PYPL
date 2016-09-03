@@ -226,7 +226,7 @@ $f3->route('GET /complete',
         $paypal = new PayPal;
         $result = $paypal->complete($token, $payerid);
 
-        if ($result['ACK'] != 'Success') {
+        if ($result['ACK'] != 'Success' && $result['ACK'] != 'SuccessWithWarning') {
             // Handle API error code
             die('Error with API call - ' . $result["L_ERRORCODE0"]);
         } else {
