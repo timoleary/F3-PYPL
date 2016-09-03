@@ -153,7 +153,7 @@ create($paymentAction,$currencyCode,$totalAmount,$optional[]);
 $result=$paypal->create("Sale","EUR","171.00");
 
 // Check the API call was successful
-if ($result['ACK']!='Success'){
+if(strtoupper($result['ACK']) != 'SUCCESS' && strtoupper($result['ACK']) != 'SUCCESSWITHWARNING')
 // Handle the API error
 die('Error with API call -'.$result["L_ERRORCODE0"]);
 } else {
@@ -214,7 +214,7 @@ $payerid=$f3->get('GET.PayerID');
 $result=$paypal->complete($token, $payerid);
 
 // Check the API call was successful
-if ($result['ACK']!='Success'){
+if(strtoupper($result['ACK']) != 'SUCCESS' && strtoupper($result['ACK']) != 'SUCCESSWITHWARNING')
 // Handle the API error
 die('Error with API call -'.$result["L_ERRORCODE0"]);
 } else {
@@ -282,7 +282,7 @@ $optional=array('ADDROVERRIDE'=>1);
 $result = $paypal->create("Sale", "EUR", "246.00", $optional);
 
 // Reroute buyer to PayPal with resulting transaction token
-if ($result['ACK'] != 'Success') {
+if(strtoupper($result['ACK']) != 'SUCCESS' && strtoupper($result['ACK']) != 'SUCCESSWITHWARNING')
 // Handle API error code
 die('Error with API call - ' . $result["L_ERRORCODE0"]);
 } else {
@@ -320,7 +320,7 @@ $paypal=new PayPal;
 $result=$paypal->getDetails($token);
 
 // Check for successful response
-if ($result['ACK'] != 'Success') {
+if(strtoupper($result['ACK']) != 'SUCCESS' && strtoupper($result['ACK']) != 'SUCCESSWITHWARNING')
 // Handle API error code
 die('Error with API call - ' . $result["L_ERRORCODE0"]);
 } else {
@@ -349,7 +349,7 @@ $paypal=new PayPal;
 $result=$paypal->complete($token, $payerid);
 
 // Check for successful response
-if ($result['ACK'] != 'Success') {
+if(strtoupper($result['ACK']) != 'SUCCESS' && strtoupper($result['ACK']) != 'SUCCESSWITHWARNING')
 // Handle API error code
 die('Error with API call - ' . $result["L_ERRORCODE0"]);
 } else {
@@ -388,7 +388,7 @@ $paypal->setTaxAmt("21.00");
 $result = $paypal->create("Sale", "EUR", "231.00", $optional);
 
 // Reroute buyer to PayPal with resulting transaction token
-if ($result['ACK'] != 'Success') {
+if(strtoupper($result['ACK']) != 'SUCCESS' && strtoupper($result['ACK']) != 'SUCCESSWITHWARNING')
 // Handle API error code
 die('Error with API call - ' . $result["L_ERRORCODE0"]);
 } else {
@@ -426,7 +426,7 @@ $paypal=new PayPal;
 $buyerdetails=$paypal->getDetails($token);
 
 // Check for successful response
-if ($buyerdetails['ACK'] != 'Success') {
+if(strtoupper($buyerdetails['ACK']) != 'SUCCESS' && strtoupper($buyerdetails['ACK']) != 'SUCCESSWITHWARNING')
 // Handle API error code
 die('Error with API call - ' . $buyerdetails["L_ERRORCODE0"]);
 } else {
@@ -463,7 +463,7 @@ $paypal=new PayPal;
 $result=$paypal->complete($token, $payerid);
 
 // Check for successful response
-if ($result['ACK'] != 'Success') {
+if(strtoupper($result['ACK']) != 'SUCCESS' && strtoupper($result['ACK']) != 'SUCCESSWITHWARNING')
 // Handle API error code
 die('Error with API call - ' . $result["L_ERRORCODE0"]);
 } else {
