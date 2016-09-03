@@ -203,7 +203,7 @@ $f3->route('GET /ecm',
         $result = $paypal->create("Sale", "EUR", $ordertotal, $options);
 
         // Reroute buyer to PayPal with resulting transaction token
-        if ($result['ACK'] != 'Success') {
+        if(strtoupper($result['ACK']) != 'SUCCESS' && strtoupper($result['ACK']) != 'SUCCESSWITHWARNING')	
             // Handle API error code
             die('Error with API call - ' . $result["L_ERRORCODE0"]);
         } else {
