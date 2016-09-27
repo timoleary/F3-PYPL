@@ -179,7 +179,7 @@ class PayPal
         unset($nvp['RETURNURL'], $nvp['CANCELURL']);
         $_SESSION[$setec['TOKEN']] = serialize($nvp);
 
-        $setec['redirect'] = "https://www.sandbox.paypal.com/webscr&cmd=_express-checkout&token=" . $setec['TOKEN'];
+        $setec['redirect'] = $this->redirect . $setec['TOKEN'];
         return $setec;
     }
 

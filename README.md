@@ -475,5 +475,76 @@ die('Error with API call - ' . $result["L_ERRORCODE0"]);
 );
 ```
 
+## Recurring Payments
+The following is a quick guide on implementing a recurring payment (subscription) via the classic API.
+
+Define a new route that will be used to setup the Recurring Payment and redirect the buyer to PayPal.
+
+```php
+$f3->route('GET /rp',
+function ($f3) {
+
+//Instantiate the Recurring Payments Class
+$paypal = new PayPalRP;
+
+//Set a descriptive name for the Recurring Payment
+$result = $paypal->setupRP("Test Subscription");
+
+// Reroute buyer to PayPal with resulting transaction token
+if ($result['ACK'] != 'Success') {
+// Handle API error code
+die('Error with API call - ' . $result["L_ERRORCODE0"]);
+} else {
+// Redirect Buyer to PayPal
+$f3->reroute($result['redirect']);
+}
+}
+);
+```
+
+Just like Express Checkout (we're leveraging the same API call) when we create the Recurring Payment a token value will be returned in the response. The buyer is redirected to a specific URL with the token value defined so PayPal knows what transaction to display the buyer. 
+
+For simplicity the correct URL is returned from the create() method as the 'redirect' value. 
+
+After the buyer logs and agree's to the Recurring Payment they will be redirected back to the URL defined in the PayPal section of your project config.
+
+The URL will have one value appended to it **token**. The token will be the same token that is returned when you first created the recurring payment.
+
+We now setup the terms of the recurring payment and create the profile.
+
+```php
+$f3->route('GET /rpcreate',
+function ($f3) {
+
+//Instantiate the Recurring Payments Class
+$paypal = new PayPalRP;
+
+//Define the terms of the recurring payment profile.
+$amt="10.00";
+$startdate=date('Y-m-d')."T00:00:00Z"; // UTC/GMT format eg 2013-08-24T05:38:48Z
+$period="Day"; // Day, Week, SemiMonth, Month, Year
+$frequency="2"; // Cannot exceed one year
+$currency="EUR";
+
+$paypal->setRPDetails($amt, $startdate, $period, $frequency, $currency);
+
+// grab token from URL
+$token = $f3->get('GET.token');
+
+//Create Recurring Payment Profile
+$result = $paypal->createRP($token);
+
+// Reroute buyer to PayPal with resulting transaction token
+if ($result['ACK'] != 'Success' && $result['ACK'] != 'SuccessWithWarning') {
+// Handle API error code
+die('Error with API call - ' . $result["L_ERRORCODE0"]);
+} else {
+exit(print_r($result));
+}
+
+}
+);
+````
+
 ## License
 F3-PYPL is licensed under GPL v.3
