@@ -21,13 +21,19 @@ class PayPal
      *    Class constructor
      *    Defines API endpoint, credentials, Return URL & Cancel URL
      */
-    function __construct()
+    function __construct($options=null)
     {
         $f3 = Base::instance();
         @session_start();
         $f3->sync('SESSION');
 
-        if ($f3->get('PAYPAL.endpoint') == "production") {
+        if ($options==null)
+            if ($f3->exists('PAYPAL'))
+               $options = $f3->get('PAYPAL');
+           else
+               $f3->error(500, 'No options set for PayPal');
+
+        if ($options['endpoint'] == "production") {
             $this->endpoint = 'https://api-3t.paypal.com/nvp';
             $this->redirect = 'https://www.paypal.com/webscr&cmd=_express-checkout&token=';
         } else {
@@ -35,13 +41,13 @@ class PayPal
             $this->redirect = 'https://www.sandbox.paypal.com/webscr&cmd=_express-checkout&token=';
         }
 
-        $this->creds['USER'] = $f3->get('PAYPAL.user');
-        $this->creds['PWD'] = $f3->get('PAYPAL.pass');
-        $this->creds['SIGNATURE'] = $f3->get('PAYPAL.signature');
-        $this->creds['VERSION'] = $f3->get('PAYPAL.apiver');
-        $this->returnurl = $f3->get('PAYPAL.return');
-        $this->cancelurl = $f3->get('PAYPAL.cancel');
-        if ($f3->get('PAYPAL.log')) {
+        $this->creds['USER'] = $options['user'];
+        $this->creds['PWD'] = $options['pass'];
+        $this->creds['SIGNATURE'] = $options['signature'];
+        $this->creds['VERSION'] = $options['apiver'];
+        $this->returnurl = $options['return'];
+        $this->cancelurl = $options['cancel'];
+        if ($options['log']) {
             $this->logger = new Log('paypal.log');
         }
     }
@@ -61,6 +67,7 @@ class PayPal
         $options = array(
             'method' => 'POST',
             'content' => http_build_query($arg),
+            'protocol_version' => 1.1,
         );
 
         $result = \Web::instance()->request($this->endpoint, $options);
@@ -179,7 +186,7 @@ class PayPal
         unset($nvp['RETURNURL'], $nvp['CANCELURL']);
         $_SESSION[$setec['TOKEN']] = serialize($nvp);
 
-        $setec['redirect'] = $this->redirect . $setec['TOKEN'];
+        $setec['redirect'] = "https://www.sandbox.paypal.com/webscr&cmd=_express-checkout&token=" . $setec['TOKEN'];
         return $setec;
     }
 
