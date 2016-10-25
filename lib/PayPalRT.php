@@ -3,6 +3,15 @@
 //! PayPal Reference Transactions via Classic API
 class PayPalRT extends PayPal
 {
+    
+    /**
+     *    Class constructor
+     *    Calls parent class constructor where PP config is set at instantiation.
+     */
+    function __construct($options=null)
+    {
+        parent::__construct($options);
+    }
 
     /**
      * Setup Reference Transaction Billing Agreement.

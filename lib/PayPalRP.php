@@ -7,6 +7,15 @@ class PayPalRP extends PayPal
     public $profiledetails = array();
 
     /**
+     *    Class constructor
+     *    Calls parent class constructor where PP config is set at instantiation.
+     */
+    function __construct($options=null)
+    {
+        parent::__construct($options);
+    }
+
+    /**
      * Setup Recurring Payment Billing Agreement.
      * @param  $description string
      * @param  $additional array

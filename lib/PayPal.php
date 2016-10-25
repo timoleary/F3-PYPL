@@ -20,6 +20,7 @@ class PayPal
     /**
      *    Class constructor
      *    Defines API endpoint, credentials, Return URL & Cancel URL
+     *    @param  $options array
      */
     function __construct($options=null)
     {
@@ -74,8 +75,10 @@ class PayPal
         parse_str($result['body'], $output);
 
         if (isset($this->logger)) {
-            $this->logreq("Request: " . http_build_query($arg));
-            $this->logreq("Response: " . $result['body']);
+            $arg['PWD']="*****";
+            $arg['SIGNATURE']="*****";
+            $this->logreq("Request: " . urldecode(http_build_query($arg)));
+            $this->logreq("Response: " . urldecode($result['body']));
         }
 
         return ($output);
@@ -185,8 +188,8 @@ class PayPal
         // store for reuse
         unset($nvp['RETURNURL'], $nvp['CANCELURL']);
         $_SESSION[$setec['TOKEN']] = serialize($nvp);
+        $setec['redirect'] = $this->redirect . $setec['TOKEN'];
 
-        $setec['redirect'] = "https://www.sandbox.paypal.com/webscr&cmd=_express-checkout&token=" . $setec['TOKEN'];
         return $setec;
     }
 
