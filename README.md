@@ -59,9 +59,10 @@ or
 
 
 ## Quick Start
+### PayPal Express Checkout
 Create a route that will initialize the transaction (SetExpressCheckout API) & redirect the buyer to PayPal.
 ```php
-//Create & redirect
+// Create & redirect
 $paypal=new PayPal;
 $result=$paypal->create("Sale","EUR","10.00");
 $f3->reroute($result['redirect']);
@@ -70,12 +71,20 @@ $f3->reroute($result['redirect']);
 Once the buyer is returned to your website you can simply complete the transaction (DoExpressCheckoutPayment API) by
 
 ```php
-//Return & Complete
+// Return & Complete
 $token=$f3->get('GET.token');
 $payerid=$f3->get('GET.PayerID');
 
 $paypal=new PayPal;
 $result=$paypal->complete($token, $payerid);
+```
+$result will contain an associative array of the API response.  Store the useful bits like status & transaction ID.
+
+### PayPal Pro
+```php
+// Process credit/debit card payment
+$paypal=new PayPal;
+$result=$paypal->dcc("Sale", "EUR", "10.00", $cardtype, $cardnumber, $expdate, $cvv, $ipaddress);
 ```
 $result will contain an associative array of the API response.  Store the useful bits like status & transaction ID.
 
@@ -635,6 +644,40 @@ if ($result['ACK'] != 'Success' && $result['ACK'] != 'SuccessWithWarning') {
     // Display thank you/receipt to the buyer if present.
 }
 ```
+
+## PayPal Pro
+To process credit/debit card numbers directly you can use the dcc() method.
+
+```php
+$f3->route('GET /dcc',
+function ($f3) {
+
+//Instantiate the PayPal Class
+$paypal = new PayPal;
+
+$paymentaction="Sale"; // Can be Sale or Authorization
+$currencycode="EUR"; // 3 Character currency code
+$amount="10.00"; // Amount to charge
+$cardtype='Visa'; // Visa, MasterCard, Discover etc
+$cardnumber='XXXXXXXXXXXXXXXX'; // Valid card number
+$expdate='122020'; // format MMYYYY
+$cvv='123'; // Valid security code
+$ipaddress='127.0.0.1';
+
+$result=$paypal->dcc($paymentaction, $currencycode, $amount, $cardtype, $cardnumber, $expdate, $cvv, $ipaddress);
+
+// $result will contain an associative array of the API response.  Store the useful bits like status & transaction ID.
+
+if ($result['ACK'] != 'Success' && $result['ACK'] != 'SuccessWithWarning') {
+// Handle API error code
+die('Error with API call - ' . $result["L_ERRORCODE0"]);
+} else {
+exit(print_r($result));
+}
+
+}
+);
+````
 
 ## License
 F3-PYPL is licensed under GPL v.3

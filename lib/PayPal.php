@@ -20,19 +20,19 @@ class PayPal
     /**
      *    Class constructor
      *    Defines API endpoint, credentials, Return URL & Cancel URL
-     *    @param  $options array
+     * @param  $options array
      */
-    function __construct($options=null)
+    function __construct($options = null)
     {
         $f3 = Base::instance();
         @session_start();
         $f3->sync('SESSION');
 
-        if ($options==null)
+        if ($options == null)
             if ($f3->exists('PAYPAL'))
-               $options = $f3->get('PAYPAL');
-           else
-               $f3->error(500, 'No configuration options set for F3-PYPL');
+                $options = $f3->get('PAYPAL');
+            else
+                $f3->error(500, 'No configuration options set for F3-PYPL');
 
         if ($options['endpoint'] == "production") {
             $this->endpoint = 'https://api-3t.paypal.com/nvp';
@@ -75,8 +75,8 @@ class PayPal
         parse_str($result['body'], $output);
 
         if (isset($this->logger)) {
-            $arg['PWD']="*****";
-            $arg['SIGNATURE']="*****";
+            $arg['PWD'] = "*****";
+            $arg['SIGNATURE'] = "*****";
             $this->logreq("Request: " . urldecode(http_build_query($arg)));
             $this->logreq("Response: " . urldecode($result['body']));
         }
@@ -331,7 +331,7 @@ class PayPal
      * @param $countrycode string
      */
     function updateShippingAddress($token, $name, $street1, $street2, $city, $state, $zip, $countrycode)
-    {   
+    {
         $orderdetails = unserialize($_SESSION[$token]);
         $orderdetails['PAYMENTREQUEST_0_SHIPTONAME'] = $name;
         $orderdetails['PAYMENTREQUEST_0_SHIPTOSTREET'] = $street1;
@@ -395,8 +395,8 @@ class PayPal
         $totalamount = 0;
         foreach ($basket as $lineitem) {
 
-            if (empty($lineitem->{$quantity})){
-                    $lineitem->{$quantity}=1;
+            if (empty($lineitem->{$quantity})) {
+                $lineitem->{$quantity} = 1;
             }
 
             $this->setLineItem($lineitem->{$name}, $lineitem->{$quantity}, $lineitem->{$amount});
@@ -406,6 +406,38 @@ class PayPal
         return $totalamount;
     }
 
+
+    /**
+     * Direct Credit Card (DoDirectPayment API Request)
+     * Processes a credit card payment (PayPal Pro Required).
+     * @param  $paymentaction string
+     * @param  $currency string
+     * @param  $amt string
+     * @param  $cardtype string
+     * @param  $cardnumber int
+     * @param  $expdate string
+     * @param  $cvv int
+     * @param  $ipaddress string
+     * @return array
+     */
+    function dcc($paymentaction, $currency = NULL, $amt, $cardtype, $cardnumber, $expdate, $cvv, $ipaddress, $additional = NULL)
+    {
+        $nvp = array();
+
+        $nvp['PAYMENTACTION'] = $paymentaction;
+        if (isset($currency)) {
+            $nvp['CURRENCYCODE'] = $currency;
+        }
+        $nvp['AMT'] = $amt;
+        $nvp['CREDITCARDTYPE'] = $cardtype;
+        $nvp['ACCT'] = $cardnumber;
+        $nvp['EXPDATE'] = $expdate;
+        $nvp['CVV'] = $cvv;
+        $nvp['IPADDRESS'] = $ipaddress;
+
+        $dcc = $this->apireq('DoDirectPayment', $nvp);
+        return $dcc;
+    }
 
     /**
      * Logs NVP Request
