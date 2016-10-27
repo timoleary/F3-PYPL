@@ -32,7 +32,7 @@ class PayPal
             if ($f3->exists('PAYPAL'))
                $options = $f3->get('PAYPAL');
            else
-               $f3->error(500, 'No options set for PayPal');
+               $f3->error(500, 'No configuration options set for F3-PYPL');
 
         if ($options['endpoint'] == "production") {
             $this->endpoint = 'https://api-3t.paypal.com/nvp';
