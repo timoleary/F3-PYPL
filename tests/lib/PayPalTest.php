@@ -3,17 +3,31 @@
 class PayPalTest extends PHPUnit_Framework_TestCase
 {
 
+	private $paypal;
 
     public function setUp()
     {
+    	
+    	$ppconfig = array(
+		'user'=>'apiusername',
+		'pass'=>'apipassword',
+		'signature'=>'apisignature',
+		'endpoint'=>'sandbox',
+		'apiver'=>'204.0',
+		'return'=>'http://',
+		'cancel'=>'http://',
+		'log'=>'1'
+		);
+
+        $this->paypal = new PayPal($ppconfig);
     }
 
 
     public function testsetShippingAddress()
     {
-        $paypal = new PayPal;
-        $paypal->setShippingAddress('name', 'address1', 'address2', 'city', 'state', 'postcode', 'country');
-        $address = $paypal->shippingaddress;
+
+        $this->paypal->setShippingAddress('name', 'address1', 'address2', 'city', 'state', 'postcode', 'country');
+        $address = $this->paypal->shippingaddress;
 
         $this->assertArrayHasKey('PAYMENTREQUEST_0_SHIPTONAME', $address);
         $this->assertArrayHasKey('PAYMENTREQUEST_0_SHIPTOSTREET', $address);
@@ -38,8 +52,8 @@ class PayPalTest extends PHPUnit_Framework_TestCase
         $_SESSION['ectoken'] = serialize($address);
         $_SESSION['ectoken'];
 
-        $paypal = new PayPal;
-        $paypal->updateShippingAddress('ectoken', 'name', 'address1', 'address2', 'city', 'state', 'postcode', 'country');
+
+        $this->paypal->updateShippingAddress('ectoken', 'name', 'address1', 'address2', 'city', 'state', 'postcode', 'country');
 
         $updatedaddress = unserialize($_SESSION['ectoken']);
 
@@ -63,28 +77,26 @@ class PayPalTest extends PHPUnit_Framework_TestCase
 
     public function testsetLineItem()
     {
-        $paypal = new PayPal;
-        $paypal->setLineItem('item1', 1, '1.00');
-        $paypal->setLineItem('item2', 5, '1.00');
+        $this->paypal->setLineItem('item1', 1, '1.00');
+        $this->paypal->setLineItem('item2', 5, '1.00');
 
-        $this->assertEquals('item1', $paypal->lineitems['L_PAYMENTREQUEST_0_NAME0']);
-        $this->assertEquals(1, $paypal->lineitems['L_PAYMENTREQUEST_0_QTY0']);
-        $this->assertEquals('1.00', $paypal->lineitems['L_PAYMENTREQUEST_0_AMT0']);
+        $this->assertEquals('item1', $this->paypal->lineitems['L_PAYMENTREQUEST_0_NAME0']);
+        $this->assertEquals(1, $this->paypal->lineitems['L_PAYMENTREQUEST_0_QTY0']);
+        $this->assertEquals('1.00', $this->paypal->lineitems['L_PAYMENTREQUEST_0_AMT0']);
 
-        $this->assertEquals('item2', $paypal->lineitems['L_PAYMENTREQUEST_0_NAME1']);
-        $this->assertEquals(5, $paypal->lineitems['L_PAYMENTREQUEST_0_QTY1']);
-        $this->assertEquals('1.00', $paypal->lineitems['L_PAYMENTREQUEST_0_AMT1']);
+        $this->assertEquals('item2', $this->paypal->lineitems['L_PAYMENTREQUEST_0_NAME1']);
+        $this->assertEquals(5, $this->paypal->lineitems['L_PAYMENTREQUEST_0_QTY1']);
+        $this->assertEquals('1.00', $this->paypal->lineitems['L_PAYMENTREQUEST_0_AMT1']);
 
-        $this->assertEquals('6', $paypal->itemtotal);
+        $this->assertEquals('6', $this->paypal->itemtotal);
     }
 
 
     public function testsetShippingAmt()
     {
-        $paypal = new PayPal;
-        $paypal->setShippingAmt('1.00');
+        $this->paypal->setShippingAmt('1.00');
 
-        $this->assertEquals('1.00', $paypal->shippingamt);
+        $this->assertEquals('1.00', $this->paypal->shippingamt);
     }
 
     public function testupdateShippingAmt()
@@ -94,8 +106,8 @@ class PayPalTest extends PHPUnit_Framework_TestCase
             'PAYMENTREQUEST_0_SHIPPINGAMT' => '5.00');
 
         $_SESSION['ectoken'] = serialize($test);
-        $paypal = new PayPal;
-        $paypal->updateShippingAmt('ectoken', '1.00');
+
+        $this->paypal->updateShippingAmt('ectoken', '1.00');
         $updated = unserialize($_SESSION['ectoken']);
 
         $this->assertArrayHasKey('PAYMENTREQUEST_0_AMT', $updated);
@@ -106,8 +118,8 @@ class PayPalTest extends PHPUnit_Framework_TestCase
         $test = array('PAYMENTREQUEST_0_AMT' => '15.00');
 
         $_SESSION['ectoken'] = serialize($test);
-        $paypal = new PayPal;
-        $paypal->updateShippingAmt('ectoken', '5.00');
+        
+        $this->paypal->updateShippingAmt('ectoken', '5.00');
         $updated = unserialize($_SESSION['ectoken']);
 
         $this->assertArrayHasKey('PAYMENTREQUEST_0_AMT', $updated);
@@ -120,10 +132,9 @@ class PayPalTest extends PHPUnit_Framework_TestCase
 
     public function testsetTaxAmt()
     {
-        $paypal = new PayPal;
-        $paypal->setTaxAmt('1.00');
+        $this->paypal->setTaxAmt('1.00');
 
-        $this->assertEquals('1.00', $paypal->taxamt);
+        $this->assertEquals('1.00', $this->paypal->taxamt);
     }
 
     public function testupdateTaxAmt()
@@ -133,8 +144,8 @@ class PayPalTest extends PHPUnit_Framework_TestCase
             'PAYMENTREQUEST_0_TAXAMT' => '19.00');
 
         $_SESSION['ectoken'] = serialize($test);
-        $paypal = new PayPal;
-        $paypal->updateTaxAmt('ectoken', '20.00');
+        
+        $this->paypal->updateTaxAmt('ectoken', '20.00');
         $updated = unserialize($_SESSION['ectoken']);
 
         $this->assertArrayHasKey('PAYMENTREQUEST_0_AMT', $updated);
@@ -145,8 +156,8 @@ class PayPalTest extends PHPUnit_Framework_TestCase
         $test = array('PAYMENTREQUEST_0_AMT' => '15.00');
 
         $_SESSION['ectoken'] = serialize($test);
-        $paypal = new PayPal;
-        $paypal->updateTaxAmt('ectoken', '1.50');
+        
+        $this->paypal->updateTaxAmt('ectoken', '1.50');
         $updated = unserialize($_SESSION['ectoken']);
 
         $this->assertArrayHasKey('PAYMENTREQUEST_0_AMT', $updated);

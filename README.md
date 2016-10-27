@@ -17,7 +17,7 @@ user=
 pass=
 signature=
 endpoint=sandbox
-apiver=124.0
+apiver=204.0
 return=http://
 cancel=http://
 log=0
@@ -27,10 +27,30 @@ log=0
 - pass - Your PayPal API Password
 - signature - Your PayPal API Signature
 - endpoint - API Endpoint, values can be 'sandbox' or 'production'
-- apiver - API Version current release is 124.0
+- apiver - API Version current release is 204.0
 - return - The URL that PayPal redirects your buyers to after they have logged in and clicked Continue or Pay
 - cancel - The URL that PayPal redirects the buyer to when they click the cancel & return link
 - log - logs all API requests & responses to paypal.log
+
+If you prefer you can also pass an array with above values when you instantiate the classes.
+
+```php
+// F3-PYPL config
+$ppconfig = array(
+'user'=>'apiusername',
+'pass'=>'apipassword',
+'signature'=>'apisignature',
+'endpoint'=>'sandbox',
+'apiver'=>'204.0',
+'return'=>'http://',
+'cancel'=>'http://',
+'log'=>'1'
+);
+
+// Instantiate the class with config
+$paypal=new PayPal($ppconfig);
+```
+
 
 **Manual Install**
 Copy the `lib/paypal.php` file into your `lib/` or your AUTOLOAD folder.  
@@ -473,6 +493,147 @@ die('Error with API call - ' . $result["L_ERRORCODE0"]);
 
 }
 );
+```
+
+## Recurring Payments
+The following is a quick guide on implementing a recurring payment (subscription) via the classic API.
+
+Define a new route that will be used to setup the Recurring Payment and redirect the buyer to PayPal.
+
+```php
+$f3->route('GET /rp',
+function ($f3) {
+
+//Instantiate the Recurring Payments Class
+$paypal = new PayPalRP;
+
+//Set a descriptive name for the Recurring Payment
+$result = $paypal->setupRP("Test Subscription");
+
+// Reroute buyer to PayPal with resulting transaction token
+if ($result['ACK'] != 'Success') {
+// Handle API error code
+die('Error with API call - ' . $result["L_ERRORCODE0"]);
+} else {
+// Redirect Buyer to PayPal
+$f3->reroute($result['redirect']);
+}
+}
+);
+```
+
+Just like Express Checkout (we're leveraging the same API call) when we create the Recurring Payment a token value will be returned in the response. The buyer is redirected to a specific URL with the token value defined so PayPal knows what transaction to display the buyer. 
+
+For simplicity the correct URL is returned from the create() method as the 'redirect' value. 
+
+After the buyer logs and agree's to the Recurring Payment they will be redirected back to the URL defined in the PayPal section of your project config.
+
+The URL will have one value appended to it **token**. The token will be the same token that is returned when you first created the recurring payment.
+
+We now setup the terms of the recurring payment and create the profile.
+
+```php
+$f3->route('GET /rpcreate',
+function ($f3) {
+
+//Instantiate the Recurring Payments Class
+$paypal = new PayPalRP;
+
+//Define the terms of the recurring payment profile.
+$amt="10.00";
+$startdate=date('Y-m-d')."T00:00:00Z"; // UTC/GMT format eg 2016-10-25T18:00:00Z
+$period="Day"; // Day, Week, SemiMonth, Month, Year
+$frequency="2"; // Cannot exceed one year
+$currency="EUR";
+
+$paypal->setRPDetails($amt, $startdate, $period, $frequency, $currency);
+
+// grab token from URL
+$token = $f3->get('GET.token');
+
+//Create Recurring Payment Profile
+$result = $paypal->createRP($token);
+
+// Reroute buyer to PayPal with resulting transaction token
+if ($result['ACK'] != 'Success' && $result['ACK'] != 'SuccessWithWarning') {
+// Handle API error code
+die('Error with API call - ' . $result["L_ERRORCODE0"]);
+} else {
+exit(print_r($result));
+}
+
+}
+);
+````
+
+## Reference Transactions / Billing Agreements
+The following is a quick guide on implementing Express Checkout Reference Transactions via the classic API.
+
+Define a new route that will be used to setup the billing agreement and redirect the buyer to PayPal.
+
+```php
+$f3->route('GET /basetup',
+function ($f3) {
+
+//Instantiate the Reference Transactions Class
+$paypal = new PayPalRT;
+
+//Set a descriptive name for the Recurring Payment
+$result = $paypal->setupRP("Test Subscription");
+
+// Reroute buyer to PayPal with resulting transaction token
+if ($result['ACK'] != 'Success') {
+// Handle API error code
+die('Error with API call - ' . $result["L_ERRORCODE0"]);
+} else {
+// Redirect Buyer to PayPal
+$f3->reroute($result['redirect']);
+}
+}
+);
+```
+
+When the buyer returns from PayPal we use the EC Token to create the Billing agreement using the CreateBillingAgreement API request. A successful response will contain a ['BILLINGAGREEMENTID'] value. Save this value as it is required to create future reference transactions.
+
+```php
+$f3->route('GET /bacreate',
+    function ($f3) {
+
+        // grab token & PayerID from URL
+        $token = $f3->get('GET.token');
+
+        // complete the transaction
+        $paypal = new PayPalRT;
+        $result = $paypal->createBA($token);
+
+		if ($result['ACK'] != 'Success' && $result['ACK'] != 'SuccessWithWarning') {
+            // Handle API error code
+            die('Error with API call - ' . $result["L_ERRORCODE0"]);
+        } else {
+            print_r($result);
+            // Update back office - save the billing agreement id.
+            // Display thank you/receipt to the buyer.
+        }
+
+    }
+);
+```
+
+Once you have a valid billing agreement ID for the buyer you can create/complete a transaction on their behalf using the DoReferenceTransaction API.
+
+```php
+// Create the transaction
+$paypal = new PayPalRT;
+$result = $paypal->doRT($billingAgreementId, 'Sale', 'EUR', '10.00');
+
+if ($result['ACK'] != 'Success' && $result['ACK'] != 'SuccessWithWarning') {
+    // Handle API error code
+    die('Error with API call - ' . $result["L_ERRORCODE0"]);
+} else {
+    print_r($result);
+    // Update back office - save transaction id, payment status etc
+    // Display thank you/receipt to the buyer if present.
+}
 ```
 
 ## License
