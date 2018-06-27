@@ -5,7 +5,9 @@
 	"homepage": "https://github.com/kreative/f3-pypl",
 	"license": "GPL-3.0",
 	"autoload": {
-		"classmap": ["lib/"]
+        "psr-4": { 
+        "kreative\\f3pypl\\": "lib/"
+    	}
 	},
     "require": {
         "bcosca/fatfree": "^3.5"
