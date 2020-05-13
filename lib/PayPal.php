@@ -170,7 +170,7 @@ class PayPal
             $nvp['PAYMENTREQUEST_0_SHIPPINGAMT'] = $this->shippingamt;
         }
 
-        if (isset($this->lineitems)) {
+        if ($this->itemtotal>0) {
             $this->lineitems["PAYMENTREQUEST_0_ITEMAMT"] = sprintf('%0.2f', $this->itemtotal);
             $nvp = array_merge($nvp, $this->lineitems);
         }
