@@ -171,7 +171,7 @@ class PayPal
         }
 
         if ($this->itemtotal>0) {
-            $this->lineitems["PAYMENTREQUEST_0_ITEMAMT"] = sprintf('%0.2f', $this->itemtotal);
+            $this->lineitems["PAYMENTREQUEST_0_ITEMAMT"] = number_format($this->itemtotal, 2, '.', '');
             $nvp = array_merge($nvp, $this->lineitems);
         }
 
@@ -355,10 +355,10 @@ class PayPal
     {
         $orderdetails = unserialize($_SESSION[$token]);
         if (array_key_exists('PAYMENTREQUEST_0_SHIPPINGAMT', $orderdetails)) {
-            $orderdetails['PAYMENTREQUEST_0_AMT'] = sprintf('%0.2f', $orderdetails['PAYMENTREQUEST_0_AMT'] - $orderdetails['PAYMENTREQUEST_0_SHIPPINGAMT']);
+            $orderdetails['PAYMENTREQUEST_0_AMT'] = number_format($orderdetails['PAYMENTREQUEST_0_AMT'] - $orderdetails['PAYMENTREQUEST_0_SHIPPINGAMT'], 2, '.', '');
         }
         $orderdetails['PAYMENTREQUEST_0_SHIPPINGAMT'] = $amt;
-        $orderdetails['PAYMENTREQUEST_0_AMT'] = sprintf('%0.2f', $orderdetails['PAYMENTREQUEST_0_AMT'] + $amt);
+        $orderdetails['PAYMENTREQUEST_0_AMT'] = number_format($orderdetails['PAYMENTREQUEST_0_AMT'] + $amt, 2, '.', '');
         $_SESSION[$token] = serialize($orderdetails);
     }
 
@@ -374,10 +374,10 @@ class PayPal
     {
         $orderdetails = unserialize($_SESSION[$token]);
         if (array_key_exists('PAYMENTREQUEST_0_TAXAMT', $orderdetails)) {
-            $orderdetails['PAYMENTREQUEST_0_AMT'] = sprintf('%0.2f', $orderdetails['PAYMENTREQUEST_0_AMT'] - $orderdetails['PAYMENTREQUEST_0_TAXAMT']);
+            $orderdetails['PAYMENTREQUEST_0_AMT'] = number_format($orderdetails['PAYMENTREQUEST_0_AMT'] - $orderdetails['PAYMENTREQUEST_0_TAXAMT'], 2, '.', '');
         }
         $orderdetails['PAYMENTREQUEST_0_TAXAMT'] = $amt;
-        $orderdetails['PAYMENTREQUEST_0_AMT'] = sprintf('%0.2f', $orderdetails['PAYMENTREQUEST_0_AMT'] + $amt);
+        $orderdetails['PAYMENTREQUEST_0_AMT'] = number_format($orderdetails['PAYMENTREQUEST_0_AMT'] + $amt, 2, '.', '');
         $_SESSION[$token] = serialize($orderdetails);
     }
 
